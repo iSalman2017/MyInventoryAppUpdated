@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">My Inventory App</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="editor_activity_title_add_product">Add new product</string>
+    <string name="editor_activity_title_edit_product">Edit a product</string>
+    <string name="editor_insert_product_successful">Product saved</string>
+    <string name="editor_insert_product_failed">Error with saving product</string>
+    <string name="editor_update_product_successful">Product updated</string>
+    <string name="editor_update_product_failed">Error with updating product</string>
+    <string name="empty_view_title_text">It\'s seems there is now products here...</string>
+    <string name="empty_view_subtitle_text">Get started by adding a product</string>
+    <string name="unsaved_changes_dialog_msg">Discard your changes and quit editing?</string>
+    <string name="discard">Discard</string>
+    <string name="keep_editing">Keep Editing</string>
+    <string name="editor_delete_product_successful">Product deleted</string>
+    <string name="editor_delete_product_failed">Error with deleting product</string>
+    <string name="delete_dialog_msg">Delete this product?</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+</resources>

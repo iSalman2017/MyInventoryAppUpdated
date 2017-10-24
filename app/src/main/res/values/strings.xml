@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">My Inventory App</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_insert_dummy_data">Insert dummy data</string>
+    <string name="action_delete_all_data">Delete all data</string>
 
     <string name="editor_activity_title_add_product">Add new product</string>
     <string name="editor_activity_title_edit_product">Edit a product</string>
@@ -18,4 +19,18 @@
     <string name="delete_dialog_msg">Delete this product?</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
+
+    <string name="product_name">Product Name: </string>
+    <string name="product_price">Product Price: </string>
+    <string name="ordered_qty">Ordered Quantity: </string>
+    <string name="sale_qty">Sale Quantity: </string>
+    <string name="current_qty">Current Quantity: </string>
+    <string name="sale_btn">Sale</string>
+    <string name="send_to_supplier">Send to Supplier</string>
+    <string name="increase_qty">Increase QTY</string>
+    <string name="available_qty">Available: </string>
+    <string name="sold_qty">Sold: </string>
+    <string name="choose_img">Choose Image</string>
+    <string name="qty">QTY</string>
+    <string name="empty_value">You cannot have empty values!</string>
 </resources>

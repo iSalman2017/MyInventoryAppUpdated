@@ -12,24 +12,20 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.GridView;
 
 import com.example.android.myinventoryapp.data.InventoryContract.ProductEntry;
-
-import static android.R.attr.id;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int PRODUCT_LOADER = 0;
 
     InventoryCursorAdapter mCursorAdapter;
-
-    private Button mSaleBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // Setup onItemClickListener
         productGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                 // Create new intent to go to {@link EditorActivity}
                 Intent intent = new Intent(MainActivity.this, EditorActivity.class);
 
@@ -78,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private void insertProduct() {
         // Create a ContentValues object where column names are the keys,
-        // and Toto's pet attributes are the values.
+        // and PS4 product attributes are the values.
         ContentValues values = new ContentValues();
         values.put(ProductEntry.COLUMN_PRODUCT_NAME, "PS4");
         values.put(ProductEntry.COLUMN_PRICE, 600);
@@ -100,17 +96,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            insertProduct();
-            return true;
+        // User clicked on a menu option in the app bar overflow menu
+        switch (item.getItemId()) {
+            // Respond to a click on the "Insert dummy data" menu option
+            case R.id.action_insert_dummy_data:
+                insertProduct();
+                return true;
+            // Respond to a click on the "Delete all entries" menu option
+            case R.id.action_delete_all_data:
+                deleteAllProducts();
+                return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -146,10 +142,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mCursorAdapter.swapCursor(null);
     }
 
-    /*private void deleteAllProducts() {
+    private void deleteAllProducts() {
         int rowsDeleted = getContentResolver().delete(ProductEntry.CONTENT_URI, null, null);
         Log.v("MainActivity", rowsDeleted + " rows deleted from inventory database");
-    }*/
+    }
 
 }
 

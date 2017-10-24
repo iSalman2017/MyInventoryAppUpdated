@@ -55,9 +55,11 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     private TextView mOrderedQtyText;
 
-    private TextView mImageSrc;
-
     private ImageView mImageView;
+
+    private TextView mSaleQtyText;
+
+    private EditText mIncreaseQtyText;
 
     private Button mChooseImageBtn;
 
@@ -67,11 +69,12 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     private Button mSaleBtn;
 
+    private Button mOrderBtn;
+
     private static final int REQUEST_CODE_GALLERY = 999;
 
     private static final int CAMERA_REQUEST = 1888;
 
-    private int orderedQTY = 1;
 
     public int orderQTY = 0;
     public int saleQTY = 0;
@@ -95,6 +98,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             // Invalidate the options menu, so the "Delete" menu option can be hidden.
             // (It doesn't make sense to delete a product that hasn't been created yet.)
             invalidateOptionsMenu();
+
+
         } else {
             // Otherwise this is an existing product, so change the app bar to say "Edit product"
             setTitle(getString(R.string.editor_activity_title_edit_product));
@@ -108,42 +113,63 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mNameEditText = (EditText) findViewById(R.id.edit_name);
         mPriceEditText = (EditText) findViewById(R.id.edit_price);
         mOrderedQtyText = (TextView) findViewById(R.id.txt_qty);
-        mImageSrc = (TextView) findViewById(R.id.txt_image_src);
         mImageView = (ImageView) findViewById(R.id.image_view);
         mChooseImageBtn = (Button) findViewById(R.id.btn_choose_image);
         mPlusBtn = (Button) findViewById(R.id.btn_plus);
         mMinusBtn = (Button) findViewById(R.id.btn_minus);
         mSaleBtn = (Button) findViewById(R.id.sales_btn);
+        mSaleQtyText = (TextView) findViewById(R.id.sales_txt);
+        mIncreaseQtyText = (EditText) findViewById(R.id.qty_increment);
+        mOrderBtn = (Button) findViewById(R.id.order_btn);
 
 
         mNameEditText.setOnTouchListener(mTouchListener);
         mPriceEditText.setOnTouchListener(mTouchListener);
         mOrderedQtyText.setOnTouchListener(mTouchListener);
-        mImageSrc.setOnTouchListener(mTouchListener);
         mImageView.setOnTouchListener(mTouchListener);
         mChooseImageBtn.setOnTouchListener(mTouchListener);
         mPlusBtn.setOnTouchListener(mTouchListener);
         mMinusBtn.setOnTouchListener(mTouchListener);
         mSaleBtn.setOnTouchListener(mTouchListener);
+        mSaleQtyText.setOnTouchListener(mTouchListener);
+        mIncreaseQtyText.setOnTouchListener(mTouchListener);
+        mOrderBtn.setOnTouchListener(mTouchListener);
 
         mPlusBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                orderedQTY += 1;
-                mOrderedQtyText.setText("" + orderedQTY);
+                String increaseByText = mIncreaseQtyText.getText().toString();
+                int quantity = Integer.parseInt(mOrderedQtyText.getText().toString());
+
+                //If the EditText for increase the quantity is empty, add just 1 to the quantity.
+                if (increaseByText.isEmpty()){
+                    quantity++;
+                }
+
+                // Else, add the amount set in the increase edit text to the quantity.
+                else{
+                    quantity += Integer.parseInt(increaseByText);
+                }
+                mOrderedQtyText.setText(String.valueOf(quantity));
             }
         });
 
         mMinusBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                orderedQTY -= 1;
+                String increaseByText = mIncreaseQtyText.getText().toString();
+                int quantity = Integer.parseInt(mOrderedQtyText.getText().toString());
 
-                if (orderedQTY >= 1) {
-                    mOrderedQtyText.setText("" + orderedQTY);
-                } else {
-                    orderedQTY = 1;
+                //If the EditText for decrease the quantity is empty, add just 1 to the quantity.
+                if (increaseByText.isEmpty()){
+                    quantity--;
                 }
+
+                // Else, add the amount set in the decrease edit text to the quantity.
+                else{
+                    quantity -= Integer.parseInt(increaseByText);
+                }
+                mOrderedQtyText.setText(String.valueOf(quantity));
             }
         });
 
@@ -166,10 +192,17 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             }
         });
 
-        mImageView.setOnClickListener(new View.OnClickListener() {
+
+        mOrderBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mImageSrc.setText(mImageView.getDrawable().toString());
+                Intent mailIntent = new Intent(Intent.ACTION_SENDTO);
+                mailIntent.setData(Uri.parse("mailto:"));
+                mailIntent.putExtra(Intent.EXTRA_SUBJECT, "New Order request!!");
+                mailIntent.putExtra(Intent.EXTRA_TEXT, submitOrder());
+                if (mailIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(mailIntent);
+                }
             }
         });
     }
@@ -187,18 +220,19 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-
-        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-            mImageView.setImageBitmap(photo);
-        } else {
-            Uri uri = data.getData();
-            try {
-                InputStream inputStream = getContentResolver().openInputStream(uri);
-                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                mImageView.setImageBitmap(bitmap);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
+        if (resultCode != RESULT_CANCELED) {
+            if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
+                Bitmap photo = (Bitmap) data.getExtras().get("data");
+                mImageView.setImageBitmap(photo);
+            } else {
+                Uri uri = data.getData();
+                try {
+                    InputStream inputStream = getContentResolver().openInputStream(uri);
+                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                    mImageView.setImageBitmap(bitmap);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -264,6 +298,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 InventoryContract.ProductEntry.COLUMN_PRODUCT_NAME,
                 InventoryContract.ProductEntry.COLUMN_PRICE,
                 InventoryContract.ProductEntry.COLUMN_ORDERED_QTY,
+                InventoryContract.ProductEntry.COLUMN_SALES_QTY,
                 InventoryContract.ProductEntry.COLUMN_IMAGE};
 
         // This loader will execute the ContentProvider's query method on a background thread
@@ -290,22 +325,26 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             int priceColumnIndex = cursor.getColumnIndex(InventoryContract.ProductEntry.COLUMN_PRICE);
             int imageColumnIndex = cursor.getColumnIndex(InventoryContract.ProductEntry.COLUMN_IMAGE);
             int currentQTYColumnIndex = cursor.getColumnIndex(InventoryContract.ProductEntry.COLUMN_ORDERED_QTY);
+            int saleQTYColumnIndex = cursor.getColumnIndex(InventoryContract.ProductEntry.COLUMN_SALES_QTY);
 
             // Extract out the value from the Cursor for the given column index
             String productName = cursor.getString(nameColumnIndex);
             Integer productPrice = cursor.getInt(priceColumnIndex);
             byte[] productImage = cursor.getBlob(imageColumnIndex);
             Integer currentQTY = cursor.getInt(currentQTYColumnIndex);
+            Integer saleQTY = cursor.getInt(saleQTYColumnIndex);
 
             // Update the views on the screen with the values from the database
             mNameEditText.setText(productName);
-            mPriceEditText.setText(productPrice);
-            mOrderedQtyText.setText(currentQTY);
-            if (productImage.length < 0) {
-                mImageView.setImageResource(R.mipmap.ic_launcher);
-            } else {
+            mPriceEditText.setText(String.valueOf(productPrice));
+            mOrderedQtyText.setText(String.valueOf(currentQTY));
+            mSaleQtyText.setText(String.valueOf(saleQTY));
+
+            if (productImage != null) {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(productImage, 0, productImage.length);
                 mImageView.setImageBitmap(bitmap);
+            } else {
+                mImageView.setImageResource(R.mipmap.ic_launcher);
             }
 
         }
@@ -319,7 +358,6 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         mPriceEditText.setText("");
         mOrderedQtyText.setText("1");
         mImageView.setImageResource(R.mipmap.ic_launcher);
-        mImageSrc.setText("");
     }
 
     private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
@@ -340,8 +378,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
 
         if (mCurrentProductUri == null &&
-                TextUtils.isEmpty(nameString) && TextUtils.isEmpty(priceString) &&
-                TextUtils.isEmpty(orderedQTYString)) {
+                TextUtils.isEmpty(nameString) || TextUtils.isEmpty(priceString) ||
+                TextUtils.isEmpty(orderedQTYString) || imageView == null) {
+            Toast.makeText(this, getString(R.string.empty_value),
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -464,7 +504,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
     private void showDeleteConfirmationDialog() {
         // Create an AlertDialog.Builder and set the message, and click listeners
-        // for the postivie and negative buttons on the dialog.
+        // for the positive and negative buttons on the dialog.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.delete_dialog_msg);
         builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
@@ -489,7 +529,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     /**
-     * Perform the deletion of the pet in the database.
+     * Perform the deletion of the inventory in the database.
      */
     private void deleteProduct() {
         // Only perform the delete if this is an existing product.
@@ -519,28 +559,48 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         TextView salesTextView = (TextView) findViewById(R.id.sales_txt);
         if (mCurrentProductUri != null) {
             String orderedQTYString = mOrderedQtyText.getText().toString().trim();
+            String saleQTYString = mSaleQtyText.getText().toString().trim();
             orderQTY = Integer.parseInt(orderedQTYString);
-            orderQTY -= 1;
-            saleQTY += 1;
-            salesTextView.setText(valueOf(saleQTY));
+            if (orderQTY != 0) {
+                orderQTY -= 1;
+                saleQTY = Integer.parseInt(saleQTYString);
+                saleQTY += 1;
+                salesTextView.setText(valueOf(saleQTY));
+                ContentValues values = new ContentValues();
+                values.put(InventoryContract.ProductEntry.COLUMN_ORDERED_QTY, orderQTY);
+                values.put(InventoryContract.ProductEntry.COLUMN_SALES_QTY, saleQTY);
 
-            ContentValues values = new ContentValues();
-            values.put(InventoryContract.ProductEntry.COLUMN_ORDERED_QTY, orderQTY);
-            values.put(InventoryContract.ProductEntry.COLUMN_SALES_QTY, saleQTY);
+                int rowsUpdated = getContentResolver().update(mCurrentProductUri, values, null, null);
 
-            int rowsUpdated = getContentResolver().update(mCurrentProductUri, values, null, null);
-
-            if (rowsUpdated == 0) {
-                // If no rows were updated, then there was an error with the update.
-                Toast.makeText(this, getString(R.string.editor_delete_product_failed),
-                        Toast.LENGTH_SHORT).show();
+                if (rowsUpdated == 0) {
+                    // If no rows were updated, then there was an error with the update.
+                    Toast.makeText(this, getString(R.string.editor_update_product_failed),
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    // Otherwise, the update was successful and we can display a toast.
+                    Toast.makeText(this, getString(R.string.editor_update_product_successful),
+                            Toast.LENGTH_SHORT).show();
+                }
             } else {
-                // Otherwise, the update was successful and we can display a toast.
-                Toast.makeText(this, getString(R.string.editor_delete_product_successful),
+                Toast.makeText(this, "Order quantity must not be less than 0!",
                         Toast.LENGTH_SHORT).show();
             }
+
         }
 
+    }
 
+    private String submitOrder() {
+        String nameString = mNameEditText.getText().toString().trim();
+        String priceString = mPriceEditText.getText().toString().trim();
+        String orderedQTYString = mOrderedQtyText.getText().toString().trim();
+
+        String orderSummary = "Hi! \n \nPlease provide this order:\n";
+        orderSummary += "\nProduct Name: " + nameString;
+        orderSummary += "\nPrice: " + priceString;
+        orderSummary += "\nOrdered Quantity: " + orderedQTYString;
+        orderSummary += "\n \nThank You.";
+
+        return orderSummary;
     }
 }
